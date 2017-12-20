@@ -1,4 +1,5 @@
 #include "sdl_gui_element.hpp"
+#include "sdl_gui_layout.hpp"
 #include "sdl_gui_menu_layout.hpp"
 #include "sdl_gui_vscrollbar.hpp"
 
@@ -7,6 +8,9 @@ namespace sdl_gui
 
 #ifndef SDL_GUI_SCROLL_BOX_HPP
 #define SDL_GUI_SCROLL_BOX_HPP
+
+class Label;
+class SelectableButton;
 
 class ScrollBox : public GuiElement
 {
@@ -47,8 +51,9 @@ class ScrollBox : public GuiElement
         //</f>
 
         //<f> Item Management
+        Label* CreateLabelItem(const std::string& item_text);
+        SelectableButton* CreateSelectableItem(const std::string& item_text);
         void CreateItem(const std::string& item_text);
-        // void AddElement(GuiElement* element){ m_content_layout.AddElement(element); m_scrollbar.HeadRatio(Size().h / m_content_layout.Size().h); }
         //</f>
 
     protected:

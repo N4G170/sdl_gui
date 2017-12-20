@@ -99,8 +99,8 @@ enum class LayoutWrapMode
 };
 //</f>
 
-//<f> CheckBoxGroup
-enum class CheckBoxGroupType
+//<f> SelectableGroup
+enum class SelectableGroupType
 {
     MULTIPLE,
     RADIO,

@@ -1,4 +1,4 @@
-#include "sdl_gui_base_button.hpp"
+#include "sdl_gui_selectable_button.hpp"
 #include "sdl_gui_image.hpp"
 #include <functional>
 
@@ -7,7 +7,7 @@ namespace sdl_gui
 #ifndef SDL_GUI_CHECKBOX_HPP
 #define SDL_GUI_CHECKBOX_HPP
 
-class CheckBox: public BaseButton
+class CheckBox: public SelectableButton
 {
     public:
         /* Default constructor */
@@ -26,43 +26,56 @@ class CheckBox: public BaseButton
         CheckBox& operator= (CheckBox&& other) noexcept;
 
         //<f> Overrides GuiElement
-        // virtual void Input(const SDL_Event& event);
-
-        // virtual void FixedLogic(float fixed_delta_time);
-        // virtual void Logic(float delta_time);
-
-        virtual void Render(float delta_time);
-        virtual void Render(float delta_time, Camera* camera);
+        void Render(float delta_time) override;
+        void Render(float delta_time, Camera* camera) override;
         //</f>
 
         //<f> Getters/Setters
-        bool IsChecked() const { return m_is_checked; }
-        void IsChecked(bool is_checked) { m_is_checked = is_checked; }
+        void IsSelected(bool is_selected) override
+        {
+            m_is_selected = is_selected;
+            if(m_is_selected && m_mark_element != nullptr)
+            {
+                m_mark_element->CanRender(true);
+                m_mark_element->IsActive(true);
+            }
+            else if(!m_is_selected && m_mark_element != nullptr)
+            {
+                m_mark_element->CanRender(false);
+                m_mark_element->IsActive(false);
+            }
+        }
 
-        int Value() const { return m_value; }
-        void Value(int new_value) { m_value = new_value; }
+        GuiElement* CheckMarkElement() { return m_mark_element; }
+        void CheckMarkElement(GuiElement* mark)
+        {
+            if(mark == nullptr)
+                return;
 
-        Image* CheckMarkImage() { return &m_check_mark_image; }
+            m_mark_element = mark;
+            m_mark_element->Parent(this);
+            if(m_is_selected)
+            {
+                m_mark_element->CanRender(true);
+                m_mark_element->IsActive(true);
+            }
+            else if(!m_is_selected)
+            {
+                m_mark_element->CanRender(false);
+                m_mark_element->IsActive(false);
+            }
+
+            m_mark_element->RenderIndex(-2);
+        }
         //</f>
 
-        //<f> Checkbox type
-        void ConfigAsMultiple();
-        void ConfigAsRadio();
-        //</f>
-
-        //<f> Callbacks
-        /**
-         * \brief Called when the value of this box is changed by user input
-         */
-        std::function<void(CheckBox*)> ValueChanged;
-
-        void MouseClick();
-        //</f>
-    private:
+    protected:
         // vars and stuff
-        Image m_check_mark_image;
-        bool m_is_checked;
-        int m_value;
+        GuiElement* m_mark_element;
+        /**
+         *  Function called when we click the button to change internal state. Will call \see StateChanged, if set
+         */
+        void MouseClick() override;
 };
 
 #endif //SDL_GUI_CHECKBOX_HPP

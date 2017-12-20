@@ -11,7 +11,8 @@ namespace sdl_gui
 
 //<f> Constructors & operator=
 HSlider::HSlider(GuiMainPointers main_pointers, const Position& position, const Dimensions& size):
-    GuiElement{main_pointers, position, size}, m_min_value{0}, m_max_value{100}, m_value{0}, m_drag{false}, m_mouse_x{0}, m_mouse_offset_x{0}
+    GuiElement{main_pointers, position, size}, m_min_value{0}, m_max_value{100}, m_value{0}, m_head_button{}, m_drag{false}, m_mouse_x{0}, m_mouse_offset_x{0},
+     m_value_changed_callback{}
 {
     m_head_button.reset(new BaseButton{main_pointers, position, {10,size.h + 6}});
     m_head_button->Parent(this);
@@ -26,7 +27,8 @@ HSlider::HSlider(GuiMainPointers main_pointers, const Position& position, const 
 HSlider::~HSlider() noexcept {}
 
 HSlider::HSlider(const HSlider& other): GuiElement{other}, m_min_value{other.m_min_value},
-    m_max_value{other.m_max_value}, m_value{other.m_value}, m_value_changed_callback{other.m_value_changed_callback}
+    m_max_value{other.m_max_value}, m_value{other.m_value}, m_head_button{}, m_drag{other.m_drag}, m_mouse_x{other.m_mouse_x}, m_mouse_offset_x{other.m_mouse_offset_x},
+    m_value_changed_callback{other.m_value_changed_callback}
 {
     if(other.m_head_button)
         m_head_button.reset(new BaseButton(*other.m_head_button.get()));
@@ -34,6 +36,7 @@ HSlider::HSlider(const HSlider& other): GuiElement{other}, m_min_value{other.m_m
 
 HSlider::HSlider(HSlider&& other) noexcept: GuiElement{std::move(other)}, m_min_value{std::move(other.m_min_value)},
     m_max_value{std::move(other.m_max_value)}, m_value{std::move(other.m_value)}, m_head_button{std::move(other.m_head_button)},
+    m_drag{std::move(other.m_drag)}, m_mouse_x{std::move(other.m_mouse_x)}, m_mouse_offset_x{std::move(other.m_mouse_offset_x)},
     m_value_changed_callback{std::move(other.m_value_changed_callback)}
 {
 
@@ -59,6 +62,9 @@ HSlider& HSlider::operator=(HSlider&& other) noexcept
         m_max_value = std::move(other.m_max_value);
         m_value = std::move(other.m_value);
         m_head_button = std::move(other.m_head_button);
+        m_drag = std::move(other.m_drag);
+        m_mouse_x = std::move(other.m_mouse_x);
+        m_mouse_offset_x = std::move(other.m_mouse_offset_x);
         m_value_changed_callback = std::move(other.m_value_changed_callback);
     }
     return *this;

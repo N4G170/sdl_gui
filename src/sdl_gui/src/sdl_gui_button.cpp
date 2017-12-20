@@ -24,7 +24,7 @@ Button::Button(const Button& other): BaseButton{other}
     m_label_ptr.reset(new Label(*other.m_label_ptr.get()));
 }
 
-Button::Button(Button&& other) noexcept : BaseButton{other}
+Button::Button(Button&& other) noexcept : BaseButton{std::move(other)}
 {
     m_label_ptr = std::move(other.m_label_ptr);
 }
@@ -44,6 +44,7 @@ Button& Button::operator=(Button&& other) noexcept
 {
     if(this != &other)
     {
+        BaseButton::operator=(std::move(other));
         m_label_ptr = std::move(other.m_label_ptr);
     }
     return *this;
@@ -90,7 +91,7 @@ void Button::CreateLabel(const std::string& text, const std::string& font_path, 
 void Button::CentreLabel()
 {
     if(m_label_ptr)
-        AlignWithParentPoint(sdl_gui::AnchorType::MIDDLE_CENTRE);
+        m_label_ptr->AlignWithParentPoint(sdl_gui::AnchorType::MIDDLE_CENTRE);
 }
 /* </ Virtual Methods > */
 

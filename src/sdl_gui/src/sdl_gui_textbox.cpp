@@ -10,8 +10,9 @@ namespace sdl_gui
 //<f> Constructors & operator=
 Textbox::Textbox(GuiMainPointers main_pointers, const Position& position, const Dimensions& size) :
     GuiElement{main_pointers, position, size}, m_bg_image{main_pointers, position, size},
-    m_text_label{main_pointers, position, size}, m_caret_label{main_pointers, position, size}, m_label_to_render{&m_text_label}, m_text{""}, m_default_text{"<i>Click to edit</i>"},
-    m_blink_time_limit{0.5}, m_blink_time{0}
+    m_text_label{main_pointers, position, size}, m_caret_label{main_pointers, position, size}, m_label_to_render{&m_text_label}, m_text{""},
+    m_text_representation{""}, m_default_text{"<i>Click to edit</i>"},
+    m_blink_time_limit{0.5}, m_blink_time{0}, m_input_type{TextboxInputType::ALPHANUMERIC}, m_mouse_interaction{}
 {
     AddGuiCollider({0,0}, Size(), &m_transform);
 
@@ -19,6 +20,7 @@ Textbox::Textbox(GuiMainPointers main_pointers, const Position& position, const 
     m_bg_image.Parent(this);
     m_bg_image.TransformPtr()->ParentViewport(&m_transform);
     m_bg_image.LocalPosition({0,0});
+    
     // m_viewport_rect = RectFromStructs(position, size);
     // m_text_label.RenderBorder(true);
     m_text_label.Parent(this);
@@ -37,14 +39,19 @@ Textbox::~Textbox() noexcept
 }
 
 Textbox::Textbox(const Textbox& other) : GuiElement{other}, m_bg_image{other.m_bg_image}, m_viewport_rect{other.m_viewport_rect}, m_text_label{other.m_text_label},
-    m_caret_label{other.m_caret_label}, m_label_to_render{other.m_label_to_render}
+    m_caret_label{other.m_caret_label}, m_label_to_render{other.m_label_to_render}, m_text{other.m_text},
+    m_text_representation{other.m_text_representation}, m_default_text{other.m_default_text},
+    m_blink_time_limit{other.m_blink_time_limit}, m_blink_time{other.m_blink_time}, m_input_type{other.m_input_type}, m_mouse_interaction{other.m_mouse_interaction}
 {
 
 }
 
 Textbox::Textbox(Textbox&& other) noexcept : GuiElement{std::move(other)}, m_bg_image{std::move(other.m_bg_image)}, m_viewport_rect{std::move(other.m_viewport_rect)},
     m_text_label{std::move(other.m_text_label)}, m_caret_label{std::move(other.m_caret_label)},
-    m_label_to_render{std::move(other.m_label_to_render)}
+    m_label_to_render{std::move(other.m_label_to_render)}, m_text{std::move(other.m_text)},
+    m_text_representation{std::move(other.m_text_representation)}, m_default_text{std::move(other.m_default_text)},
+    m_blink_time_limit{std::move(other.m_blink_time_limit)}, m_blink_time{std::move(other.m_blink_time)},
+    m_input_type{std::move(other.m_input_type)}, m_mouse_interaction{std::move(other.m_mouse_interaction)}
 {
 
 }
@@ -69,6 +76,13 @@ Textbox& Textbox::operator=(Textbox&& other) noexcept
         m_text_label = std::move(other.m_text_label);
         m_caret_label = std::move(other.m_caret_label);
         m_label_to_render = std::move(other.m_label_to_render);
+        m_text = std::move(other.m_text);
+        m_text_representation = std::move(other.m_text_representation);
+        m_default_text = std::move(other.m_default_text);
+        m_blink_time_limit = std::move(other.m_blink_time_limit);
+        m_blink_time = std::move(other.m_blink_time);
+        m_input_type = std::move(other.m_input_type);
+        m_mouse_interaction = std::move(other.m_mouse_interaction);
     }
     return *this;
 }
@@ -206,7 +220,8 @@ void Textbox::Render(float delta_time, Camera* camera)
         m_caret_label.Render(delta_time, camera);
         SDL_RenderSetViewport(m_main_pointers.main_renderer_ptr, nullptr);
 
-        SDL_RenderDrawRect(m_main_pointers.main_renderer_ptr, &m_viewport_rect);
+        // SDL_RenderDrawRect(m_main_pointers.main_renderer_ptr, &m_viewport_rect);
+        SDL_RenderDrawRect(m_main_pointers.main_renderer_ptr, &dst);
     }
 
 }

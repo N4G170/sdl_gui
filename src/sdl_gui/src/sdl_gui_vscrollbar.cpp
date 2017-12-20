@@ -11,7 +11,9 @@ namespace sdl_gui
 
 //<f> Constructors & operator=
 VScrollbar::VScrollbar(GuiMainPointers main_pointers, const Position& position, const Dimensions& size):
-    GuiElement{main_pointers, position, size}, m_min_value{0}, m_max_value{100}, m_drag{false}, m_mouse_y{0}, m_mouse_offset_y{0}
+    GuiElement{main_pointers, position, size}, m_min_value{0}, m_max_value{100}, m_head_button{}, m_head_ratio{1},
+    m_drag{false}, m_mouse_y{0}, m_mouse_offset_y{0}, m_previous_head_y{0},
+    m_value_changed_callback{}
 {
     m_head_button.reset(new BaseButton{main_pointers, position, {size.w,  10}});
     m_head_button->Parent(this);
@@ -29,14 +31,18 @@ VScrollbar::VScrollbar(GuiMainPointers main_pointers, const Position& position, 
 VScrollbar::~VScrollbar() noexcept {}
 
 VScrollbar::VScrollbar(const VScrollbar& other): GuiElement{other}, m_min_value{other.m_min_value},
-    m_max_value{other.m_max_value}, m_value_changed_callback{other.m_value_changed_callback}
+    m_max_value{other.m_max_value}, m_head_button{}, m_head_ratio{other.m_head_ratio},
+    m_drag{other.m_drag}, m_mouse_y{other.m_mouse_y}, m_mouse_offset_y{other.m_mouse_offset_y}, m_previous_head_y{other.m_previous_head_y},
+    m_value_changed_callback{other.m_value_changed_callback}
 {
     if(other.m_head_button)
         m_head_button.reset(new BaseButton(*other.m_head_button.get()));
 }
 
 VScrollbar::VScrollbar(VScrollbar&& other) noexcept: GuiElement{std::move(other)}, m_min_value{std::move(other.m_min_value)},
-    m_max_value{std::move(other.m_max_value)}, m_head_button{std::move(other.m_head_button)},
+    m_max_value{std::move(other.m_max_value)}, m_head_button{std::move(other.m_head_button)}, m_head_ratio{std::move(other.m_head_ratio)},
+    m_drag{std::move(other.m_drag)}, m_mouse_y{std::move(other.m_mouse_y)},
+    m_mouse_offset_y{std::move(other.m_mouse_offset_y)}, m_previous_head_y{std::move(other.m_previous_head_y)},
     m_value_changed_callback{std::move(other.m_value_changed_callback)}
 {
 
@@ -61,6 +67,11 @@ VScrollbar& VScrollbar::operator=(VScrollbar&& other) noexcept
         m_min_value = std::move(other.m_min_value);
         m_max_value = std::move(other.m_max_value);
         m_head_button = std::move(other.m_head_button);
+        m_head_ratio = std::move(other.m_head_ratio);
+        m_drag = std::move(other.m_drag);
+        m_mouse_y = std::move(other.m_mouse_y);
+        m_mouse_offset_y = std::move(other.m_mouse_offset_y);
+        m_previous_head_y = std::move(other.m_previous_head_y);
         m_value_changed_callback = std::move(other.m_value_changed_callback);
     }
     return *this;

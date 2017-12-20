@@ -10,6 +10,7 @@
 
 #include "sdl_gui_uid.hpp"
 #include "sdl_gui_collider.hpp"
+#include "sdl_gui_utils.hpp"
 #include <tuple>
 
 namespace sdl_gui
@@ -56,6 +57,14 @@ class GuiElement
 
         //<f> Render
         SDL_Rect RenderRect();
+        int RenderIndex() const { return m_render_index; }
+        void RenderIndex(int index){ m_render_index = index; }
+
+        /**
+         * \brief Calculate and return the render index taking into account the render indeces of all parents (the last -1 will for the child to allways be on top of parent).
+         * \nEX: parent rindex = 1; this->m_render_index = -1; GlobalRenderIndex will be 1+(-1) - 1 = -1 meaning that this will stay on top of parent
+         */
+        int GlobalRenderIndex(){ if(m_parent == nullptr) return m_render_index; else return m_render_index + m_parent->GlobalRenderIndex() - 1; }
         //</f>
 
         //<f> Getters/Setters
@@ -63,11 +72,41 @@ class GuiElement
         GuiTransform* TransformPtr() { return &m_transform; }
         Camera* GuiCamera() const { return m_main_pointers.main_camera_ptr; }
 
+        //<f> Render
         bool CanRender() const { return m_render; }
         void CanRender(bool render){ m_render = render; }
+        void Show() { m_render = true; }
+        void Hide() { m_render = false; }
+        //</f>
 
+        //<f> Active
         bool IsActive() const { return m_active; }
         void IsActive(bool is_active){ m_active = is_active; }
+        void Activate() { m_active = true; }
+        void Deactivate() { m_active = false; }
+        //</f>
+
+        //<f> Enable
+        bool Enabled() const{ return m_enabled; }
+        void Enabled(bool enabled){ m_enabled = enabled; }
+        void Enable() { m_enabled = true; }
+        void Disable() { m_enabled = false; }
+
+        /**
+         * \brief Search element parents for disabled elements. Also check itself
+         * \return false if no disabled parents(or self), true when the first disabled parent is found
+         */
+        bool DisabledSelfOrParent()
+        {
+            if(m_parent == nullptr)
+                return !m_enabled;//return true if disabled
+
+            if(!m_enabled)//is disabled
+                return true;
+            else
+                return m_parent->DisabledSelfOrParent();//keep checking tree
+        }
+        //</f>
         //</f>
 
         //<f> Position, Size & Transform interface
@@ -80,10 +119,32 @@ class GuiElement
         void ParentViewport(GuiTransform* parent_viewport) { m_transform.ParentViewport(parent_viewport); }
         GuiTransform* ParentViewport() const { return m_transform.ParentViewport(); }
 
-        void Size(const Dimensions& new_size) { m_size = new_size; }
+        //<f> Size
         Dimensions Size() const { return m_size; }
+        void Size(const Dimensions& new_size) { m_size = new_size; }
+        void Size(float new_w, float new_h) { m_size.w = new_w; m_size.h = new_h; }
+        void SizeW(float new_w) { m_size.w = new_w; }
+        void SizeH(float new_h) { m_size.h = new_h; }
+
+        Dimensions ScaledSize() const { return {m_size.w * m_scale.x, m_size.h * m_scale.y}; }
 
         SDL_Rect Bounds();
+        void ResizeToBounds(){ auto bounds = Bounds(); Size(SizeFromInts(bounds.w, bounds.h)); }
+        //</f>
+
+        //<f> Scale
+        Scale LocalScale() const { return m_scale; }
+        void LocalScale(const Scale& scale) { m_scale = scale; }
+        void LocalScaleX(float scale_x){ m_scale.x = scale_x; }
+        void LocalScaleY(float scale_y){ m_scale.y = scale_y; }
+
+        Scale GlobalScale();
+        //</f>
+
+        //<f> Anchoring
+
+        AnchorType Anchor() const { return m_anchor; }
+        void Anchor(AnchorType anchor) { m_anchor = anchor; }
 
         /**
          * \brief Align this element specific point to the same point in the parent.
@@ -93,6 +154,7 @@ class GuiElement
          */
         void AlignWithParentPoint(AnchorType point_type, Position offset = {0,0});
         //</f>
+        //</f>
 
         //<f> Interaction & Colliders
         /* Add Box collider */
@@ -101,7 +163,21 @@ class GuiElement
         void AddGuiCollider(const Position& local_position, float circle_radius, GuiTransform* owner_transform);
 
         Collider* GetColliderPtr() const { return m_collider.get(); }
-        // Collider* GetColliderPtr(int index) const { return m_colliders[index].get(); }
+
+        /**
+         * \brief Update collider size. Checks if collider exists or not
+         * \n Returns true if collider exists and value was changed, false otherwise
+         */
+        bool UpdateColliderSize(ColliderSizeUnion size)
+        {
+            if(m_collider == nullptr) return false;
+            else m_collider->UpdateColliderSize(size); return true;
+        }
+
+        /**
+         * \brief Update collider size to match element size. Internally calls \see bool UpdateColliderSize(ColliderSizeUnion size)
+         */
+        bool FitColliderSize() { return  UpdateColliderSize({Size()}); };
 
         virtual void Focus(){ m_focused = true; }
         virtual void UnFocus(){ m_focused = false; }
@@ -118,13 +194,20 @@ class GuiElement
 
     protected:
         // vars and stuff
+        bool m_enabled;
+
         //<f> ID, Position and Size
         UID m_uid;
         GuiTransform m_transform;
+
+        AnchorType m_anchor;
+
         /**
          * Render dimensions of the element
          */
         Dimensions m_size;
+
+        Scale m_scale;
         //</f>
 
         //<f> Render
@@ -138,6 +221,11 @@ class GuiElement
          * False - Do not render
          */
         bool m_render;
+
+        /**
+         * \brief Index for rendering sorting. The lower the value the further back the element (ex: 1 is over -1)
+         */
+        int m_render_index;
         //</f>
 
         //<f> Interaction
@@ -159,6 +247,10 @@ class GuiElement
          *  \brief DO NOT CALL THIS METHOD
          */
         void RemoveChild(UID uid);
+        //</f>
+
+        //<f>Anchor position
+        Position CalculateAnchoredPosition();
         //</f>
 };
 

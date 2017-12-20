@@ -2,21 +2,19 @@
 #include <utility>
 #include "sdl_gui_constants.hpp"
 #include "sdl_gui_log.hpp"
+#include "sdl_gui_utils.hpp"
 
 namespace sdl_gui
 {
 
 CheckBox::CheckBox(GuiMainPointers main_pointers, const Position& position, const Dimensions& size) :
-    BaseButton{main_pointers, position, size},
-    m_check_mark_image{main_pointers, position, size}, m_is_checked{false}, m_value{}
+    SelectableButton{main_pointers, position, size}, m_mark_element{nullptr}
 {
-    AddGuiCollider({0,0}, Size(), &m_transform);
-
-    m_check_mark_image.Parent(this);
-    ConfigAsMultiple();
+    m_set_selected_state = false;//disable select transition change (we use the mark on this one)
+    // AddGuiCollider({0,0}, Size(), &m_transform);//set by parent
 
     //the other needed callbacks are set by the parent BaseButton
-    m_mouse_interaction.MouseButtonCallback(SDL_BUTTON_LEFT, InputKeyCallbackType::CLICK, std::bind(&CheckBox::MouseClick, this));
+    m_mouse_interaction.MouseButtonCallback(SDL_BUTTON_LEFT, InputKeyCallbackType::CLICK, std::bind(&CheckBox::MouseClick, this));//override parent
 }
 
 CheckBox::~CheckBox() noexcept
@@ -24,16 +22,16 @@ CheckBox::~CheckBox() noexcept
 
 }
 
-CheckBox::CheckBox(const CheckBox& other) : BaseButton{other}, m_check_mark_image{other.m_check_mark_image},
-    m_is_checked{other.m_is_checked}, m_value{other.m_value}
+CheckBox::CheckBox(const CheckBox& other) : SelectableButton{other}, m_mark_element{other.m_mark_element}
 {
-
+    //the this pointer changes so we set the callback again
+    m_mouse_interaction.MouseButtonCallback(SDL_BUTTON_LEFT, InputKeyCallbackType::CLICK, std::bind(&CheckBox::MouseClick, this));//override parent
 }
 
-CheckBox::CheckBox(CheckBox&& other) noexcept : BaseButton{std::move(other)}, m_check_mark_image{std::move(other.m_check_mark_image)},
-    m_is_checked{std::move(other.m_is_checked)}, m_value{std::move(other.m_value)}
+CheckBox::CheckBox(CheckBox&& other) noexcept : SelectableButton{std::move(other)}, m_mark_element{std::move(other.m_mark_element)}
 {
-
+    //the this pointer changes so we set the callback again
+    m_mouse_interaction.MouseButtonCallback(SDL_BUTTON_LEFT, InputKeyCallbackType::CLICK, std::bind(&CheckBox::MouseClick, this));//override parent
 }
 
 CheckBox& CheckBox::operator=(const CheckBox& other)
@@ -51,25 +49,17 @@ CheckBox& CheckBox::operator=(CheckBox&& other) noexcept
 {
     if(this != &other)
     {
-        this->m_check_mark_image = std::move(other.m_check_mark_image);
-        this->m_is_checked = std::move(other.m_is_checked);
-        this->m_value = std::move(other.m_value);
+        SelectableButton::operator=(std::move(other));
+        this->m_mark_element = std::move(other.m_mark_element);
+
+        //the this pointer changes so we set the callback again
+        m_mouse_interaction.MouseButtonCallback(SDL_BUTTON_LEFT, InputKeyCallbackType::CLICK, std::bind(&CheckBox::MouseClick, this));//override parent
     }
 
     return *this;
 }
 
 //<f> Overrides GUIElement
-// void CheckBox::Input(const SDL_Event& event)
-// {
-//
-// }
-
-// void CheckBox::Logic(float fixed_delta_time)
-// {
-
-// }
-
 void CheckBox::Render(float delta_time)
 {
     Render(delta_time, m_main_pointers.main_camera_ptr);
@@ -80,67 +70,27 @@ void CheckBox::Render(float delta_time, Camera* camera)
     if(!m_render)
         return;
 
-    SDL_Rect dst{RenderRect()};
-
-    //apply camera position
-    if(!m_transform.ParentViewport())//if inside viewport we cant add camera position
-    {
-        dst.x += camera->CameraPosition().x;
-        dst.y += camera->CameraPosition().y;
-    }
-
-    if(camera->RectInsideCamera(dst))
-    {
-        m_current_transition->Render(dst);
-
-        //calculate checkmark coordinates and dimensions//TMP
-        int check_w{dst.w/3};
-        int check_h{dst.w/3};
-
-        dst.x = dst.x + (dst.w - check_w) / 2;
-        dst.y = dst.y + (dst.h - check_h) / 2;
-
-        dst.w = check_w;
-        dst.h = check_h;
-
-        if(m_is_checked)
-            m_check_mark_image.Render(delta_time, camera);
-    }
-}
-//</f>
-
-//<f> Checkbox type
-void CheckBox::ConfigAsMultiple()
-{
-    float size_ratio{75/100.f};
-    TransitionType(sdl_gui::ButtonTransitionType::COLOUR);
-    TransitionColourPtr()->ChangeBaseTexture(c_img_white_dot);
-
-    m_check_mark_image.ChangeTexture(c_img_white_dot);
-    m_check_mark_image.ColourModulation(Colour::Black);
-    m_check_mark_image.Size( {Size().w*size_ratio, Size().h*size_ratio} );
-    m_check_mark_image.AlignWithParentPoint(sdl_gui::AnchorType::MIDDLE_CENTRE);
-}
-
-void CheckBox::ConfigAsRadio()
-{
-    float size_ratio{(75/100.f)};
-    TransitionType(sdl_gui::ButtonTransitionType::COLOUR);
-    TransitionColourPtr()->ChangeBaseTexture(c_img_white_circle);
-
-    m_check_mark_image.ChangeTexture(c_img_white_circle);
-    m_check_mark_image.ColourModulation(Colour::Black);
-    m_check_mark_image.Size( {Size().w*size_ratio, Size().h*size_ratio} );
-    m_check_mark_image.AlignWithParentPoint(sdl_gui::AnchorType::MIDDLE_CENTRE);
+    SelectableButton::Render(delta_time, camera);
 }
 //</f>
 
 void CheckBox::MouseClick()
 {
-    m_is_checked = !m_is_checked;
+    m_is_selected = !m_is_selected;
 
-    if(ValueChanged)
-        ValueChanged(this);
+    if(m_is_selected && m_mark_element != nullptr)
+    {
+        m_mark_element->CanRender(true);
+        m_mark_element->IsActive(true);
+    }
+    else if(!m_is_selected && m_mark_element != nullptr)
+    {
+        m_mark_element->CanRender(false);
+        m_mark_element->IsActive(false);
+    }
+
+    if(StateChanged)
+        StateChanged(this);
 }
 
 }//namespace

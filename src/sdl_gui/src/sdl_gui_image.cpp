@@ -4,6 +4,7 @@
 #include "sdl_gui_constants.hpp"
 #include <utility>
 
+
 namespace sdl_gui
 {
 
@@ -19,7 +20,8 @@ Image::Image(const Image& other): GuiElement{other}, m_texture{other.m_texture}
         m_src_rect.reset(new SDL_Rect(*other.m_src_rect.get()));
 }
 
-Image::Image(Image&& other) noexcept: GuiElement{std::move(other)}, m_texture{std::move(other.m_texture)}, m_src_rect{std::move(other.m_src_rect)} {}
+Image::Image(Image&& other) noexcept: GuiElement{std::move(other)}, m_texture{std::move(other.m_texture)}, m_src_rect{std::move(other.m_src_rect)}
+{}
 
 Image& Image::operator=(const Image& other)
 {

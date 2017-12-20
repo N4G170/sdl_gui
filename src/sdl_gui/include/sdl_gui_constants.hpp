@@ -18,6 +18,11 @@ const std::string c_img_white_dot{"data/sdl_gui/img/white_dot.png"};
 const std::string c_img_white_circle{"data/sdl_gui/img/white_circle.png"};
 const std::string c_button_base{"data/sdl_gui/img/button_base.png"};
 
+const std::string c_img_btn_active{"data/sdl_gui/img/active.png"};
+const std::string c_img_btn_inactive{"data/sdl_gui/img/inactive.png"};
+const std::string c_img_btn_over{"data/sdl_gui/img/over.png"};
+const std::string c_img_btn_pressed{"data/sdl_gui/img/pressed.png"};
+
 const std::string c_default_font_path{"data/sdl_gui/font/DejaVuSansMono.ttf"};
 
 //</f>
@@ -44,9 +49,21 @@ namespace Colour
 //</f>
 
 //<f> Default Sizes
-const int c_default_font_size{18};
+const int c_default_font_size{12};
 //</f>
 
+//<f> Buttons Defaults
+const SDL_Colour c_active_colour {255,255,255,255};
+const SDL_Colour c_inactive_colour {128,128,128,128};
+const SDL_Colour c_over_colour {128,128,128,255};
+const SDL_Colour c_pressed_colour {96,96,96,255};
+const SDL_Colour c_selected_colour {64,64,64,255};
+//</f>
+
+//<f> Default Ints
+const int c_default_anim_fps{24};
+const int c_tooltip_render_index{-50};
+//</f>
 #endif //SDL_GUI_CONSTANTS_HPP
 
 }//namespace

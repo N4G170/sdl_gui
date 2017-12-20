@@ -6,6 +6,8 @@
 #include "sdl_gui_log.hpp"
 #include "sdl_gui_utils.hpp"
 
+#include "utils.hpp"
+
 namespace sdl_gui
 {
 //<f> Constructors & operator=
@@ -123,6 +125,7 @@ void Label::Render(float delta_time, Camera* camera)
 void Label::Text(const std::string& text, const SDL_Colour& text_colour)
 {
     m_text_colour = text_colour;
+    m_text = text;
     int w{0}, h{0};
     m_font_ptr->CalculateTextTextureSize(text, &w, &h, m_line_length);
     Dimensions size{Size()};
@@ -138,6 +141,18 @@ void Label::Text(const std::string& text, const SDL_Colour& text_colour)
     }
 
     m_font_ptr->StringTexture(text, 0, 0, text_colour, m_text_texture.TexturePtr(), m_line_length);
+}
+
+void Label::FontSize(int size)
+{
+    //can change font
+    if(m_font_ptr != nullptr && size != m_font_ptr->FontSize())
+    {
+        auto font_path{m_font_ptr->FontFilePath()};
+        m_font_ptr = m_main_pointers.resource_manager_ptr->GetFont(font_path, size);
+        //rebuild label
+        Text(m_text, m_text_colour);
+    }
 }
 
 void Label::LineLength(int line_length)

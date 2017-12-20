@@ -13,6 +13,7 @@ namespace sdl_gui
 class ButtonTransition
 {
     public:
+        virtual ~ButtonTransition() noexcept{};
         //<f> Virtual Methods
         virtual void Render(const SDL_Rect& dst) = 0;
         virtual void ChangeState(ButtonState state) = 0;

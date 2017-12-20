@@ -15,7 +15,7 @@ GuiTransform::GuiTransform(const GuiTransform& other): m_owner{other.m_owner}, m
     m_parent_viewport{other.m_parent_viewport} {}
 
 GuiTransform::GuiTransform(GuiTransform&& other) noexcept: m_owner{std::move(other.m_owner)}, m_local_position{std::move(other.m_local_position)},
-    m_parent_viewport{std::move(other.m_parent_viewport)} {}
+    m_parent_viewport{std::move(other.m_parent_viewport)} {other.m_owner = nullptr; other.m_parent_viewport = nullptr;}
 
 GuiTransform& GuiTransform::operator=(const GuiTransform& other)
 {
@@ -35,6 +35,8 @@ GuiTransform& GuiTransform::operator=(GuiTransform&& other) noexcept
         m_owner = std::move(other.m_owner);
         m_local_position = std::move(other.m_local_position);
         m_parent_viewport = std::move(other.m_parent_viewport);
+        other.m_owner = nullptr;
+        other.m_parent_viewport = nullptr;
     }
     return *this;
 }

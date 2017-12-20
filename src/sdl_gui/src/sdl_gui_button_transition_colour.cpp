@@ -7,12 +7,12 @@ namespace sdl_gui
 
 //<f> Constructors & operator=
 ButtonTransitionColour::ButtonTransitionColour(ResourceManager* resource_manager_ptr): m_resource_manager_ptr{resource_manager_ptr},
-    m_texture{resource_manager_ptr->GetTexture(c_img_white_dot)}, m_current_colour{255,255,255,255}
+    m_texture{resource_manager_ptr->GetTexture(c_img_white_dot)}, m_current_colour{255,255,255,255}, m_state_colours{}
 {
-    m_state_colours.emplace(ButtonState::ACTIVE, SDL_Colour{255,255,255,255});
-    m_state_colours.emplace(ButtonState::INACTIVE, SDL_Colour{255,255,255,255});
-    m_state_colours.emplace(ButtonState::OVER, SDL_Colour{255,255,255,128});
-    m_state_colours.emplace(ButtonState::PRESSED, SDL_Colour{128,128,128,255});
+    m_state_colours.emplace(ButtonState::ACTIVE, c_active_colour);
+    m_state_colours.emplace(ButtonState::INACTIVE, c_inactive_colour);
+    m_state_colours.emplace(ButtonState::OVER, c_over_colour);
+    m_state_colours.emplace(ButtonState::PRESSED, c_pressed_colour);
 }
 
 ButtonTransitionColour::~ButtonTransitionColour() noexcept {}

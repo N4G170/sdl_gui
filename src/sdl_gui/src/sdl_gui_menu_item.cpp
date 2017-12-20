@@ -8,18 +8,20 @@ namespace sdl_gui
 
 //<f> Constructors & operator=
 MenuItem::MenuItem(GuiMainPointers main_pointers, const Position& position, const Dimensions& size): GuiElement(main_pointers, position, size),
-    m_bg_image{main_pointers, position, size}, m_label{main_pointers, position, size}, m_is_selected{false}
+    m_bg_image{main_pointers, position, size}, m_label{main_pointers, position, size}, m_is_selected{false}, m_state_colours{}
 {
     AddGuiCollider({0,0}, size, this->TransformPtr());
 
     m_bg_image.Parent(this);
+    m_bg_image.LocalPosition({0,0});
     m_label.Parent(this);
+    m_label.LocalPosition({0,0});
 
-    m_state_colours.insert({ButtonState::ACTIVE, {255,255,255,255}});
-    m_state_colours.insert({ButtonState::OVER, {128,128,128,255}});
-    m_state_colours.insert({ButtonState::PRESSED, {64,64,64,255}});
-    m_state_colours.insert({ButtonState::SELECTED, {100,100,100,255}});
-    m_state_colours.insert({ButtonState::INACTIVE, {255,255,255,128}});
+    m_state_colours.insert({ButtonState::ACTIVE, c_active_colour});
+    m_state_colours.insert({ButtonState::OVER, c_over_colour});
+    m_state_colours.insert({ButtonState::PRESSED, c_pressed_colour});
+    m_state_colours.insert({ButtonState::SELECTED, c_selected_colour});
+    m_state_colours.insert({ButtonState::INACTIVE, c_inactive_colour});
 
     m_mouse_interaction.MouseButtonCallback(SDL_BUTTON_LEFT, InputKeyCallbackType::DOWN, std::bind(&MenuItem::ChangeStateColour, this, ButtonState::PRESSED));
     m_mouse_interaction.MouseButtonCallback(SDL_BUTTON_LEFT, InputKeyCallbackType::CLICK, std::bind(&MenuItem::ChangeSelected, this));
@@ -32,13 +34,13 @@ MenuItem::~MenuItem() noexcept
 }
 
 MenuItem::MenuItem(const MenuItem& other): GuiElement{other}, m_bg_image{other.m_bg_image}, m_label{other.m_label},
-    m_mouse_interaction{other.m_mouse_interaction}, m_is_selected{other.m_is_selected}
+    m_mouse_interaction{other.m_mouse_interaction}, m_is_selected{other.m_is_selected}, m_state_colours{other.m_state_colours}
 {
 
 }
 
 MenuItem::MenuItem(MenuItem&& other) noexcept: GuiElement{std::move(other)}, m_bg_image{std::move(other.m_bg_image)}, m_label{std::move(other.m_label)},
-    m_mouse_interaction{std::move(other.m_mouse_interaction)}, m_is_selected{std::move(other.m_is_selected)}
+    m_mouse_interaction{std::move(other.m_mouse_interaction)}, m_is_selected{std::move(other.m_is_selected)}, m_state_colours{std::move(other.m_state_colours)}
 {
 
 }
@@ -64,6 +66,7 @@ MenuItem& MenuItem::operator=(MenuItem&& other) noexcept
         m_label = std::move(other.m_label);
         m_mouse_interaction = std::move(other.m_mouse_interaction);
         m_is_selected = std::move(other.m_is_selected);
+        m_state_colours = std::move(other.m_state_colours);
     }
     return *this;
 }
@@ -75,7 +78,7 @@ void MenuItem::Input(const SDL_Event& event)
     if( !m_active )
         return;
 
-    m_mouse_interaction.Input(event, m_collider.get());
+    // m_mouse_interaction.Input(event, m_collider.get());
 }
 
 void MenuItem::ClearInput()

@@ -1,13 +1,15 @@
 #include "sdl_gui_button_transition_multi_image.hpp"
+#include "sdl_gui_constants.hpp"
 #include <utility>
 
 namespace sdl_gui
 {
 
 //<f> Constructors & operator=
-ButtonTransitionMultiImage::ButtonTransitionMultiImage(ResourceManager* resource_manager_ptr): m_resource_manager_ptr{resource_manager_ptr}, m_current_texture_ptr{nullptr}
+ButtonTransitionMultiImage::ButtonTransitionMultiImage(ResourceManager* resource_manager_ptr): m_resource_manager_ptr{resource_manager_ptr}, m_state_textures{},
+    m_current_texture_ptr{nullptr}
 {
-    SetStateTexture("data/img/i.png", "data/img/a.png", "data/img/o.png", "data/img/p.png");
+    SetStateTexture(c_img_btn_inactive, c_img_btn_active, c_img_btn_over, c_img_btn_pressed);
 }
 
 ButtonTransitionMultiImage::~ButtonTransitionMultiImage() noexcept {}

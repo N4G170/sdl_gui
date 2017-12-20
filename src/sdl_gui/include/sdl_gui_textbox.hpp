@@ -48,6 +48,10 @@ class Textbox : public GuiElement
 
         //<f> Getters/Setters
         std::string Text() const { return m_text_label.Text(); }
+        void Text(const std::string& text) { m_text_label.Text(text); }
+
+        std::string DefaultText() const { return m_default_text; }
+        void DefaultText(const std::string& text) { m_default_text = text; }
 
         TextboxInputType InputType() const { return m_input_type; }
         void InputType(TextboxInputType input_type) { m_input_type = input_type; }
@@ -70,7 +74,6 @@ class Textbox : public GuiElement
         float m_blink_time_limit;
         float m_blink_time;
 
-        int m_character_limit;
         TextboxInputType m_input_type;
 
         MouseInteraction m_mouse_interaction;

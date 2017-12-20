@@ -58,13 +58,13 @@ Texture ResourceManager::GetTexture(const std::string& texture_path)
             }
             else
             {
-                Log("Failed to create texture from surface. Line: "+std::string{__LINE__}+" File: "+std::string{__FILE__});
+                LogLine("Failed to create texture from surface. File path:"+texture_path);
                 return {};
             }
         }
         else
         {
-            Log("Failed to create surface from file. Line: "+std::string{__LINE__}+" File: "+std::string{__FILE__});
+            LogLine("Failed to create surface from file. File path:"+texture_path);
             return {};
         }
     }

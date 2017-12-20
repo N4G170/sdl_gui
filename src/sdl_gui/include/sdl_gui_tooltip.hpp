@@ -46,17 +46,15 @@ class Tooltip: public GuiElement
         //</f>
 
         //<f> Getters/Setters
-        void TooltipText(const std::string&);
-        std::string TooltipText() const { return m_text; }
+        void Content(GuiElement* content);
+        GuiElement* Content() const { return m_content; }
 
         // void ChangeCollider(const Collider& collider){ m_colliders[0] = collider; }
         //</f>
 
     protected:
         // vars and stuff
-        Texture m_background_texture;
-        std::unique_ptr<Label> m_label_ptr;
-        std::string m_text;
+        GuiElement* m_content;
 
         MouseInteraction m_mouse_interaction;
         float m_wait_time;

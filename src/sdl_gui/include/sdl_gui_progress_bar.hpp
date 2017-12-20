@@ -1,5 +1,4 @@
 #include "sdl_gui_element.hpp"
-#include "sdl_gui_texture.hpp"
 #include "sdl_gui_enums.hpp"
 #include "sdl_gui_utils.hpp"
 #include <functional>
@@ -36,8 +35,8 @@ class ProgressBar : public GuiElement
         // virtual void FixedLogic(float fixed_delta_time);
         // virtual void Logic(float delta_time);
 
-        virtual void Render(float delta_time);
-        virtual void Render(float delta_time, Camera* camera);
+        // virtual void Render(float delta_time);
+        // virtual void Render(float delta_time, Camera* camera);
         //</f>
 
         //<f> Virtual Methods
@@ -46,21 +45,16 @@ class ProgressBar : public GuiElement
 
         //<f> Getters/Setters
         ProgressBarDirection BarDirection() const { return m_bar_direction; }
-        void BarDirection(ProgressBarDirection bar_direction) { m_bar_direction = bar_direction; }
+        void BarDirection(ProgressBarDirection bar_direction);
 
         float Value() const { return m_value; }
         /**
          * Set the current value for the ProgressBar. If the value > max or value < min, value will be set to the right limit
          */
-        void Value(float new_value)
-        {
-            if(new_value != m_value)
-            {
-                m_value = KeepInInterval(new_value, m_min_value, m_max_value);
-                if(m_value_changed_callback)
-                    m_value_changed_callback(m_value);
-            }
-        }
+        void Value(float new_value);
+
+        float Ratio() const { return m_value / m_max_value; }
+        void Ratio(float ratio);
 
         float MaxValue() const { return m_max_value; }
         //update value if we change the range
@@ -71,12 +65,21 @@ class ProgressBar : public GuiElement
 
         void ValueChangedCallback(const std::function<void(float)>& callback){ m_value_changed_callback = callback; }
         std::function<void(float)>* ValueChangedCallback() { return &m_value_changed_callback; }
+
+        void BarValueChangedCallback(const std::function<void(ProgressBar*)>& callback){ m_bar_value_changed_callback = callback; }
+        std::function<void(ProgressBar*)>* BarValueChangedCallback() { return &m_bar_value_changed_callback; }
+
+        GuiElement* BackgroundElement() const { return m_background; }
+        void BackgroundElement(GuiElement* background) { m_background = background; m_background->Parent(this); }
+
+        GuiElement* BarElement() const { return m_bar; }
+        void BarElement(GuiElement* bar) { m_bar = bar; m_bar->Parent(this); UpdateBar(); m_bar->RenderIndex(-10); ConfigBar(); }
         //</f>
 
     protected:
         // vars and stuff
-        Texture m_bg_texture;
-        Texture m_bar_texture;
+        GuiElement* m_background;
+        GuiElement* m_bar;
 
         ProgressBarDirection m_bar_direction;
 
@@ -85,11 +88,16 @@ class ProgressBar : public GuiElement
         float m_value;
 
         std::function<void(float)> m_value_changed_callback;
+        std::function<void(ProgressBar*)> m_bar_value_changed_callback;
 
-        void RenderLeft(SDL_Rect& dst);
-        void RenderRight(SDL_Rect& dst);
-        void RenderUp(SDL_Rect& dst);
-        void RenderDown(SDL_Rect& dst);
+        /**
+         * \brief Set the correct anchor for the bar element
+         */
+        void ConfigBar();
+        /**
+         * \brief Update the scale of the bar (x or y depending on the direction)
+         */
+        void UpdateBar();
 };
 
 #endif //SDL_GUI_PROGRESS_BAR_HPP

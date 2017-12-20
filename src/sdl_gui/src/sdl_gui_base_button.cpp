@@ -8,10 +8,12 @@
 namespace sdl_gui
 {
 
-BaseButton::BaseButton(GuiMainPointers main_pointers, const Position& position, const Dimensions& size) : GuiElement{main_pointers, position, size}
+BaseButton::BaseButton(GuiMainPointers main_pointers, const Position& position, const Dimensions& size) : GuiElement{main_pointers, position, size},
+    m_transition_type{ButtonTransitionType::COLOUR}, m_transition_none_ptr{}, m_transition_colour_ptr{}, m_transition_single_image_ptr{}, m_transition_multi_image_ptr{},
+    m_current_transition{nullptr}, m_mouse_interaction{}
 {
-    TransitionType(ButtonTransitionType::COLOUR);//will init m_transition_type & m_current_transition
-    ButtonTransitionCallback(ButtonState::ACTIVE);//will init vars with current state
+    TransitionType(ButtonTransitionType::COLOUR);//will set m_transition_type & m_current_transition
+    ButtonTransitionCallback(ButtonState::ACTIVE);//will set vars with current state
 
     AddGuiCollider({0,0}, Size(), &m_transform);
 
@@ -25,7 +27,9 @@ BaseButton::~BaseButton() noexcept
 
 }
 
-BaseButton::BaseButton(const BaseButton& other): GuiElement{other}, m_transition_type{other.m_transition_type}, m_mouse_interaction{other.m_mouse_interaction}
+BaseButton::BaseButton(const BaseButton& other): GuiElement{other}, m_transition_type{other.m_transition_type},
+    m_transition_none_ptr{}, m_transition_colour_ptr{}, m_transition_single_image_ptr{}, m_transition_multi_image_ptr{},
+    m_current_transition{nullptr}, m_mouse_interaction{other.m_mouse_interaction}
 {
     if(other.m_transition_none_ptr)
         m_transition_none_ptr.reset(new ButtonTransitionNone(*other.m_transition_none_ptr.get()));
@@ -38,6 +42,8 @@ BaseButton::BaseButton(const BaseButton& other): GuiElement{other}, m_transition
 
     SelectTransition(other.m_transition_type);
 
+    m_mouse_interaction.MouseButtonCallback(SDL_BUTTON_LEFT, InputKeyCallbackType::HOLD, std::bind(&BaseButton::ButtonTransitionCallback, this, ButtonState::PRESSED));
+    m_mouse_interaction.MouseCallback(MouseCallbackType::OVER, std::bind(&BaseButton::ButtonTransitionCallback, this, ButtonState::OVER));
 }
 
 BaseButton::BaseButton(BaseButton&& other) noexcept : GuiElement{std::move(other)}, m_transition_type{std::move(other.m_transition_type)},
@@ -45,7 +51,8 @@ BaseButton::BaseButton(BaseButton&& other) noexcept : GuiElement{std::move(other
     m_transition_single_image_ptr{std::move(other.m_transition_single_image_ptr)}, m_transition_multi_image_ptr{std::move(other.m_transition_multi_image_ptr)},
     m_current_transition{other.m_current_transition}, m_mouse_interaction{std::move(other.m_mouse_interaction)}
 {
-
+    m_mouse_interaction.MouseButtonCallback(SDL_BUTTON_LEFT, InputKeyCallbackType::HOLD, std::bind(&BaseButton::ButtonTransitionCallback, this, ButtonState::PRESSED));
+    m_mouse_interaction.MouseCallback(MouseCallbackType::OVER, std::bind(&BaseButton::ButtonTransitionCallback, this, ButtonState::OVER));
 }
 
 BaseButton& BaseButton::operator=(const BaseButton& other)
@@ -71,6 +78,9 @@ BaseButton& BaseButton::operator=(BaseButton&& other) noexcept
         m_transition_multi_image_ptr = std::move(other.m_transition_multi_image_ptr);
         m_current_transition = other.m_current_transition;
         m_mouse_interaction = std::move(other.m_mouse_interaction);
+
+        m_mouse_interaction.MouseButtonCallback(SDL_BUTTON_LEFT, InputKeyCallbackType::HOLD, std::bind(&BaseButton::ButtonTransitionCallback, this, ButtonState::PRESSED));
+        m_mouse_interaction.MouseCallback(MouseCallbackType::OVER, std::bind(&BaseButton::ButtonTransitionCallback, this, ButtonState::OVER));
     }
 
     return *this;

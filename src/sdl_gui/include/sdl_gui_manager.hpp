@@ -1,7 +1,7 @@
 #include "sdl_gui_element.hpp"
 #include "sdl_gui_base_button.hpp"
 #include "sdl_gui_button.hpp"
-#include "sdl_gui_checkbox_group.hpp"
+#include "sdl_gui_selectable_group.hpp"
 #include "sdl_gui_checkbox.hpp"
 #include "sdl_gui_image.hpp"
 #include "sdl_gui_label.hpp"
@@ -13,9 +13,15 @@
 #include "sdl_gui_textbox.hpp"
 #include "sdl_gui_tooltip.hpp"
 #include "sdl_gui_scroll_box.hpp"
+#include "sdl_gui_selectable_button.hpp"
+#include "sdl_gui_basic_frame_animation.hpp"
 #include "sdl_gui_camera.hpp"
+#include "sdl_gui_log.hpp"
 
+#include <vector>
 #include <memory>
+#include <algorithm>
+
 
 namespace sdl_gui
 {
@@ -60,8 +66,23 @@ class GuiManager
         T* CreateElement(const Position& position, const Dimensions& size)
         {
             T* element = new T{{m_renderer_ptr, m_resource_manager_ptr, m_main_camera_ptr.get()}, position, size};
-            m_elements.emplace(element->ElementUID(), element);
-            return dynamic_cast<T*>(m_elements[element->ElementUID()].get());
+            m_elements.emplace_back(element);
+
+            return element;
+            // return dynamic_cast<T*>(m_elements[m_elements.size() - 1].get());
+        }
+
+        /**
+         * \brief Create a copy of an existing element to be managed by the manager. Returns a pointer to said element
+         */
+        template<typename T>
+        T* CopyElement(T* original)
+        {
+            T* element = new T{*original};
+            m_elements.emplace_back(element);
+
+            return element;
+            // return dynamic_cast<T*>(m_elements[m_elements.size() - 1].get());
         }
 
         /**
@@ -81,11 +102,11 @@ class GuiManager
         template<typename T>
         T* ReleaseElement(UID uid)
         {
-            auto find_result{m_elements.find(uid)};
+            auto find_result{ std::find_if( std::begin(m_elements), std::end(m_elements), [uid](auto& element)->bool{ return uid == element.get()->ElementUID();} ) };
             if(find_result != std::end(m_elements))//found element
             {
-                auto tmp_ptr{m_elements[uid].release()};//release pointer from unique_ptr
-                m_elements.erase(uid);//remove from hash table
+                auto tmp_ptr{find_result->release()};//release pointer from unique_ptr
+                m_elements.erase(find_result);//remove from vector table
 
                 return dynamic_cast<T*>(tmp_ptr);
             }
@@ -107,7 +128,7 @@ class GuiManager
         //</f>
     private:
         // vars and stuff
-        std::unordered_map<UID, std::unique_ptr<GuiElement>> m_elements;
+        std::vector<std::unique_ptr<GuiElement>> m_elements;
         SDL_Renderer* m_renderer_ptr;
         ResourceManager* m_resource_manager_ptr;
         std::unique_ptr<Camera> m_main_camera_ptr;

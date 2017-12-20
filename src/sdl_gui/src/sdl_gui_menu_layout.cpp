@@ -8,8 +8,7 @@ namespace sdl_gui
 {
 
 MenuLayout::MenuLayout(GuiMainPointers main_pointers, const Position& position, const Dimensions& size): GuiElement{main_pointers, position, size},
-    // m_layout_config{MenuLayoutWrapMode::LAYOUT_OVERFLOW, {0,0},0,0,0,0,0,0,0,0}
-    m_layout_config{5,5,5,5,5,5}
+     m_elements{}, m_layout_config{5,5,5,5,5,5}
 {
 
 }
@@ -19,7 +18,7 @@ MenuLayout::~MenuLayout() noexcept
 
 }
 
-MenuLayout::MenuLayout(const MenuLayout& other): GuiElement{other}, m_layout_config{other.m_layout_config}
+MenuLayout::MenuLayout(const MenuLayout& other): GuiElement{other}, m_elements{}, m_layout_config{other.m_layout_config}
 {
     for(auto& element : m_elements)
         m_elements.push_back(std::unique_ptr<MenuItem>{new MenuItem{*element.get()}});
@@ -99,7 +98,7 @@ void MenuLayout::CreateItem(const std::string& text)
 {
     // ResizeToFit();
     auto item{ new MenuItem{m_main_pointers, {0,0}, {(Size().w - m_layout_config.left_margin - m_layout_config.right_margin), 0} } };
-    LogLine(ToString(Size()));
+
     item->Text(text);
     AddElement(item);
 }

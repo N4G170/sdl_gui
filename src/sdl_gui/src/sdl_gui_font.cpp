@@ -7,6 +7,8 @@
 #include "sdl_gui_utf8.hpp"
 #include "sdl_gui_constants.hpp"
 
+#include "utils.hpp"
+
 namespace sdl_gui
 {
 
@@ -82,6 +84,7 @@ bool Font::StringTexture(const std::string& text, int origin_x, int origin_y, SD
     SDL_SetRenderTarget(m_renderer_ptr, output_texture);
     for(int i{0}; i < text_codes.size(); ++i)
     {
+        //<f>check \n & \t
         if(text_codes[i] == c_new_line_code)//new line \n
         {
             x = 0;//reset "caret"
@@ -100,30 +103,67 @@ bool Font::StringTexture(const std::string& text, int origin_x, int origin_y, SD
             }
             continue;
         }
+        //</f>
 
-        SDL_Rect src{};
-        SDL_Rect dst{x, y, 0, 0};
+        //<f> Check newline because of line line_length
+        //break line ?
+        if(line_length > 0)//line length was set
+        {
+            if(text_codes[i] == ' ')//current char is a space ' '
+            {
+                //check if next word fits
+                int word_length{0};
+                int char_index{i + 1};
+                while(char_index < text_codes.size() && text_codes[char_index] > ' ')//space is the first valid char
+                {
+                    word_length += m_glyphs_positions[text_codes[char_index]].normal.w;//get norma glyph width
+                    ++char_index;
+                }
 
+                if(x + word_length > line_length)//new line
+                {
+                    x = 0;
+                    y = y + m_font_height + m_line_spacing;
+                }
+            }
+            else if(x > line_length)//new line
+            {
+                x = 0;
+                y = y + m_font_height + m_line_spacing;
+            }
+        }
+        //</f>
+
+        //<f> Check for tags <b> <i>
         if(CheckTextTag(true, text_codes, i, i+2, 1))//check if open tag
         {
-            i+=3;
+            i+=2;//jump to last tag char
             bold = true;
+            continue;//jump to next loop cycle (will move to next valid char)
         }
         else if(CheckTextTag(false, text_codes, i, i+3, 1))//close
         {
-            i+=4;
+            i+=3;//jump to last tag char
             bold = false;
+            continue;//jump to next code in the array
         }
         else if(CheckTextTag(true, text_codes, i, i+2, 2))//check if open tag italic
         {
-            i+=3;
+            i+=2;//jump to last tag char
             italic = true;
+            continue;//jump to next loop cycle (will move to next valid char)
         }
         else if(CheckTextTag(false, text_codes, i, i+3, 2))//close
         {
-            i+=4;
+            i+=3;//jump to last tag char
             italic = false;
+            continue;//jump to next code in the array
         }
+        //</f>
+
+        //<f> Get correct glyph and render
+        SDL_Rect src{};
+        SDL_Rect dst{x, y, 0, 0};
 
         //get stats from correct font style
         if(italic && bold)
@@ -141,40 +181,17 @@ bool Font::StringTexture(const std::string& text, int origin_x, int origin_y, SD
         SDL_RenderCopy(m_renderer_ptr, m_font_texture, &src, &dst);
         x += dst.w;//update x
 
-        //break line ?
-        if(line_length > 0)
-        {
-            if(text_codes[i] == ' ')//' '
-            {
-                //check if next word fits
-                int word_length{0};
-                int char_index{i + 1};
-                while(char_index < text_codes.size() && text_codes[char_index] > ' ')//space is the first valid char
-                {
-                    word_length += src.w;
-                    ++char_index;
-                }
-
-                if(x + word_length > line_length)//new line
-                {
-                    x = 0;
-                    y = y + dst.h + m_line_spacing;
-                }
-            }
-            else if(x > line_length)//new line
-            {
-                x = 0;
-                y = y + dst.h + m_line_spacing;
-            }
-        }
         //update prev vars
         prev_h = dst.h;
         prev_w = dst.w;
-    }
-    SDL_SetRenderTarget(m_renderer_ptr, nullptr);
+        //</f>
 
+    }
+
+    SDL_SetRenderTarget(m_renderer_ptr, nullptr);
     SDL_SetTextureColorMod(m_font_texture, 255, 255, 255);//reset modulation to white
     SDL_SetTextureAlphaMod(m_font_texture, 255);//opaque
+
     return true;
 }
 
@@ -298,6 +315,7 @@ void Font::CalculateTextTextureSize(const std::string& text, int* w, int* h, int
     //run trough all codes
     for(int i{0}; i < text_codes.size(); ++i)
     {
+        //<f> Check \n and \t
         if(text_codes[i] == c_new_line_code)//new line \n
         {
             line_w = 0;//reset width
@@ -316,30 +334,67 @@ void Font::CalculateTextTextureSize(const std::string& text, int* w, int* h, int
             }
             continue;
         }
+        //</f>
 
+        //<f> Check for newline with line_length
+        //Check we we need a new line because of width limit reached
+        if(line_length > 0)
+        {
+            if(text_codes[i] == ' ')//' '
+            {
+                //check if next word fits
+                int word_length{0};
+                int char_index{i + 1};
+                while(char_index < text_codes.size() && text_codes[char_index] > ' ')//space is the first valid char
+                {
+                    word_length += prev_glyph_w;
+                    ++char_index;
+                }
+
+                if(line_w + word_length > line_length)//new line
+                {
+                    line_w = 0;
+                    line_h += m_font_height + m_line_spacing;
+                }
+            }
+            else if(line_w > line_length)//new line
+            {
+                line_w = 0;
+                line_h += m_font_height + m_line_spacing;
+            }
+        }
+        //</f>
+
+        //<f> Check for tags <b> <i>
         if(CheckTextTag(true, text_codes, i, i+2, 1))//check if open tag
         {
-            i+=3;
+            i+=2;//jump to last tag char
             bold = true;
+            continue;//jump to next loop cycle (will move to next valid char)
         }
         else if(CheckTextTag(false, text_codes, i, i+3, 1))//close
         {
-            i+=4;
+            i+=3;//jump to last tag char
             bold = false;
+            continue;//jump to next code in the array
         }
         else if(CheckTextTag(true, text_codes, i, i+2, 2))//check if open tag italic
         {
-            i+=3;
+            i+=2;//jump to last tag char
             italic = true;
+            continue;//jump to next loop cycle (will move to next valid char)
         }
         else if(CheckTextTag(false, text_codes, i, i+3, 2))//close
         {
-            i+=4;
+            i+=3;//jump to last tag char
             italic = false;
+            continue;//jump to next code in the array
         }
+        //</f>
 
+        //<f> Get Correct glyph data & update vars
         //get stats from correct font style
-        SDL_Rect glyph_rect;
+        SDL_Rect glyph_rect{0,0,0,0};
         if(italic && bold)
             glyph_rect = m_glyphs_positions[text_codes[i]].italic_bold;
         else if(bold)
@@ -352,32 +407,6 @@ void Font::CalculateTextTextureSize(const std::string& text, int* w, int* h, int
         //add current glyph width to line width
         line_w += glyph_rect.w;
 
-        //Check we we need a new line because of width limit reached
-        if(line_length > 0)
-        {
-            if(text_codes[i] == ' ')//' '
-            {
-                //check if next word fits
-                int word_length{0};
-                int char_index{i + 1};
-                while(char_index < text_codes.size() && text_codes[char_index] > ' ')//space is the first valid char
-                {
-                    word_length += glyph_rect.w;
-                    ++char_index;
-                }
-
-                if(line_w + word_length > line_length)//new line
-                {
-                    line_w = 0;
-                    line_h += glyph_rect.h + m_line_spacing;
-                }
-            }
-            else if(line_w > line_length)//new line
-            {
-                line_w = 0;
-                line_h += glyph_rect.h + m_line_spacing;
-            }
-        }
         //update prev vars
         prev_glyph_w = glyph_rect.w;
 
@@ -386,6 +415,7 @@ void Font::CalculateTextTextureSize(const std::string& text, int* w, int* h, int
             max_w = line_w;
         if(line_h > max_h)
             max_h = line_h;
+        //</f>
     }//for all codes
 
     //return max values using the pointers

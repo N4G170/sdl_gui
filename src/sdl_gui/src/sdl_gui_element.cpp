@@ -8,29 +8,34 @@
 namespace sdl_gui
 {
 //<f> Constructors & operator=
-GuiElement::GuiElement(GuiMainPointers main_pointers, const Position& position, const Dimensions& size): m_uid{GenerateUID()}, m_transform{this}, m_size{size},
-    m_main_pointers{main_pointers}, m_render{true}, m_collider{nullptr}, m_active{true}, m_focused{false}, m_parent{nullptr}
+GuiElement::GuiElement(GuiMainPointers main_pointers, const Position& position, const Dimensions& size): m_enabled{true}, m_uid{GenerateUID()}, m_transform{this},
+    m_anchor{AnchorType::TOP_LEFT}, m_size{size}, m_scale{1,1}, m_main_pointers{main_pointers},
+    m_render{true}, m_render_index{0}, m_collider{nullptr}, m_active{true}, m_focused{false}, m_parent{nullptr}
 {
     m_transform.LocalPosition(position);
 }
 
 GuiElement::~GuiElement() noexcept {}
 
-GuiElement::GuiElement(const GuiElement& other) : m_uid{GenerateUID()}, m_transform{other.m_transform},
-    m_size{other.m_size}, m_main_pointers{other.m_main_pointers},
-    m_render{other.m_render}, m_active{other.m_active}, m_focused{other.m_focused},
+GuiElement::GuiElement(const GuiElement& other) : m_enabled{other.m_enabled}, m_uid{GenerateUID()}, m_transform{other.m_transform}, m_anchor{other.m_anchor},
+    m_size{other.m_size}, m_scale{other.m_scale}, m_main_pointers{other.m_main_pointers},
+    m_render{other.m_render}, m_render_index{other.m_render_index}, m_active{other.m_active}, m_focused{other.m_focused},
     m_parent{other.m_parent}, m_children{other.m_children}
 {
     if(other.m_collider)
         m_collider.reset(other.m_collider.get()->Duplicate());
     else
         m_collider.reset();
+
+    m_transform.Owner(this);
 }
 
-GuiElement::GuiElement(GuiElement&& other) noexcept : m_uid{std::move(other.m_uid)}, m_transform{std::move(other.m_transform)},
-    m_size{std::move(other.m_size)}, m_main_pointers{std::move(other.m_main_pointers)},
-    m_render{std::move(other.m_render)}, m_collider{std::move(other.m_collider)}, m_active{std::move(other.m_active)}, m_focused{std::move(other.m_focused)},
-    m_parent{std::move(other.m_parent)}, m_children{std::move(other.m_children)} {}
+GuiElement::GuiElement(GuiElement&& other) noexcept : m_enabled{std::move(other.m_enabled)}, m_uid{std::move(other.m_uid)}, m_transform{std::move(other.m_transform)},
+    m_anchor{std::move(other.m_anchor)}, m_size{std::move(other.m_size)}, m_scale{std::move(other.m_scale)},
+    m_main_pointers{std::move(other.m_main_pointers)},
+    m_render{std::move(other.m_render)}, m_render_index{std::move(other.m_render_index)}, m_collider{std::move(other.m_collider)},
+    m_active{std::move(other.m_active)}, m_focused{std::move(other.m_focused)},
+    m_parent{std::move(other.m_parent)}, m_children{std::move(other.m_children)} { m_transform.Owner(this); }
 
 GuiElement& GuiElement::operator= (const GuiElement& other)
 {
@@ -46,16 +51,22 @@ GuiElement& GuiElement::operator= (GuiElement&& other)
 {
     if(this != &other)
     {
+        this->m_enabled = std::move(other.m_enabled);
         this->m_uid = std::move(other.m_uid);
         this->m_transform = std::move(other.m_transform);
+        this->m_anchor = std::move(other.m_anchor);
         this->m_size = std::move(other.m_size);
+        this->m_scale = std::move(other.m_scale);
         this->m_main_pointers = std::move(other.m_main_pointers);
         this->m_render = std::move(other.m_render);
+        this->m_render_index = std::move(other.m_render_index);
         this->m_collider = std::move(other.m_collider);
         this->m_active = std::move(other.m_active);
         this->m_focused = std::move(other.m_focused);
         this->m_parent = std::move(other.m_parent);
         this->m_children =std::move(other.m_children);
+
+        m_transform.Owner(this);
     }
     return *this;
 }
@@ -79,8 +90,50 @@ void GuiElement::Render(float delta_time, Camera* camera) {}
 SDL_Rect GuiElement::RenderRect()
 {
     Position position{GlobalPosition()};
-    // return {static_cast<int>(position.x), static_cast<int>(position.y), static_cast<int>(m_size.w), static_cast<int>(m_size.h)};
-    return RectFromFloats(position.x, position.y, m_size.w, m_size.h);
+    Dimensions size{ScaledSize()};
+
+    switch(m_anchor)
+    {
+        case AnchorType::TOP_LEFT : break;//nothing to do
+
+        case AnchorType::TOP_CENTRE :
+            position.x -= size.w / 2;
+        break;
+
+        case AnchorType::TOP_RIGHT :
+            position.x -= size.w;
+        break;
+
+        case AnchorType::MIDDLE_LEFT :
+            position.y -= size.h / 2;
+        break;
+
+        case AnchorType::MIDDLE_CENTRE :
+            position.x -= size.w / 2;
+            position.y -= size.h / 2;
+        break;
+
+        case AnchorType::MIDDLE_RIGHT :
+            position.x -= size.w;
+            position.y -= size.h / 2;
+        break;
+
+        case AnchorType::BOTTOM_LEFT :
+            position.y -= size.h;
+        break;
+
+        case AnchorType::BOTTOM_CENTRE :
+            position.x -= size.w / 2;
+            position.y -= size.h;
+        break;
+
+        case AnchorType::BOTTOM_RIGHT :
+            position.x -= size.w;
+            position.y -= size.h;
+        break;
+    }
+
+    return RectFromFloats(position.x, position.y, size.w, size.h);
 }
 //</f>
 
@@ -172,6 +225,15 @@ SDL_Rect GuiElement::Bounds()
     //max_y - min_y = h
     return {min_x, min_y, max_x - min_x, max_y - min_y};
 }
+
+//<f> Scale
+Scale GuiElement::GlobalScale()
+{
+    if(m_parent == nullptr)
+        return m_scale;
+    return m_parent->GlobalScale() * m_scale;
+};
+//</f>
 //</f>
 
 //<f> Interaction & Colliders

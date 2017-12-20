@@ -52,6 +52,13 @@ std::string ToString(const Position& position, const Dimensions& size);
 //</f>
 
 //<f> Maths
+/**
+ * \brief Limits the value to the interval between min and max
+ * @param value value to be checked
+ * @param min   min value of the interval
+ * @param max   max value of the interval
+ * \return  the final value
+ */
 template<typename T>
 T KeepInInterval(T value, T min, T max)
 {

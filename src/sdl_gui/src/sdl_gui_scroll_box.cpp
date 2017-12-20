@@ -102,6 +102,17 @@ void ScrollBox::Render(float delta_time, Camera* camera)
 //</f>
 
 //<f> Item Management
+Label* ScrollBox::CreateLabelItem(const std::string& item_text)
+{
+    // auto label
+    return nullptr;
+}
+
+SelectableButton* ScrollBox::CreateSelectableItem(const std::string& item_text)
+{
+    return nullptr;
+}
+
 void ScrollBox::CreateItem(const std::string& item_text)
 {
     m_content_layout.CreateItem(item_text);

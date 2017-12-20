@@ -59,6 +59,7 @@ class Font
         int LineSpacing() const { return m_line_spacing; }
         void LineSpacing(int line_spacing) { m_line_spacing = line_spacing; }
         int FontSize() const { return m_font_size; }
+        std::string FontFilePath() const { return m_source_path; }
         //</f>
 
         // bool CharTexture(const char& character, int font_size, int origin_x, int origin_y, SDL_Colour font_colour, Texture* output_texture);

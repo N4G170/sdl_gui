@@ -88,6 +88,19 @@ class Layout: public GuiElement
         LayoutConfig Config() const { return m_layout_config; }
         void Config(const LayoutConfig& config){ m_layout_config = config; }
 
+        bool AllowVariableSizes() const { return m_allow_variable_sizes; }
+        void AllowVariableSizes(bool allow_variable_sizes)
+        {
+            if(allow_variable_sizes != m_allow_variable_sizes)
+            {
+                m_allow_variable_sizes = allow_variable_sizes;
+
+                if(m_allow_variable_sizes)
+                    UpdateElementsPositionsVariableSize();
+                else
+                    UpdateElementsPositions();
+            }
+        }
         //</f>
 
     private:
@@ -98,9 +111,14 @@ class Layout: public GuiElement
 
 
         void UpdateElementsPositions();
+        void UpdateElementsPositionsVariableSize();
 
         void ResizeToFit();
         //</f>
+        /**
+         * \brief If true Layout will not enforce element_size from config and will adapt to element size
+         */
+        bool m_allow_variable_sizes;
 
 };
 

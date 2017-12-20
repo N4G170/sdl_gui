@@ -14,7 +14,7 @@ class Camera;
 
 struct Position
 {
-    float x, y, z;
+    float x, y;
     bool operator == (const Position& other){ return other.x == x && other.y == y; }
     bool operator != (const Position& other){ return other.x != x || other.y != y; }
     Position operator + (const Position& other){ return {this->x + other.x, this->y + other.y}; }
@@ -27,6 +27,14 @@ struct Dimensions
 {
     float w, h;
     float Area(){ return w * h; }//just to stop linter from nagging about unused vars 'w' & 'h' (they are used but not here)
+};
+
+struct Scale
+{
+    float x, y;
+
+    Scale operator * (const Scale& other) { return {x * other.x, y * other.y}; }
+    Scale& operator *= (const Scale& other) { x *= other.x;  y *= other.y; return *this; } 
 };
 
 /**

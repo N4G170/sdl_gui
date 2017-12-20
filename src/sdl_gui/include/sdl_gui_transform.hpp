@@ -50,6 +50,10 @@ class GuiTransform
         // GuiTransform* Parent() const { return m_parent; }
 
         GuiElement* Owner() const { return m_owner; }
+        /**
+         * \Use only after move operator and  copy&move constructor (in owner)
+         */
+        void Owner(GuiElement* owner) { m_owner = owner; }
         //</f>
 
     protected:

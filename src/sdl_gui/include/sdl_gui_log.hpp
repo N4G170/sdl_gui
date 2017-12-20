@@ -1,4 +1,5 @@
 #include <string>
+#include <iostream>
 
 namespace sdl_gui
 {
@@ -6,17 +7,21 @@ namespace sdl_gui
 #ifndef SDL_GUI_LOG_HPP
 #define SDL_GUI_LOG_HPP
 
-enum class LogTarget
+enum LogTarget
 {
-    CONSOLE,
-    FILE
+    CONSOLE = 1,
+    FILE = 2
 };
 
 /**
  * Variable to set the default log target used by void Log(const std::string& text);
  * eg: LogTarget::CONSOLE to log to console
  */
-extern LogTarget e_default_log_target;
+extern int e_default_log_target;
+const std::string c_default_log_file{"log.txt"};
+
+void Log();
+void LogLine();
 
 void Log(const std::string& text);
 void LogLine(const std::string& text);

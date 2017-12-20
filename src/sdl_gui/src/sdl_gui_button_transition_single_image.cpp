@@ -7,9 +7,9 @@ namespace sdl_gui
 
 //<f> Constructors & operator=
 ButtonTransitionSingleImage::ButtonTransitionSingleImage(ResourceManager* resource_manager_ptr) : m_resource_manager_ptr{resource_manager_ptr},
-    m_texture{resource_manager_ptr->GetTexture(c_img_white_dot)}, m_current_src_rect_ptr{nullptr}
+    m_texture{resource_manager_ptr->GetTexture(c_button_base)}, m_state_rects{}, m_current_src_rect_ptr{nullptr}
 {
-
+    SetStateTextureSrcRect({0,0,1,1}, {0,1,1,1}, {0,2,1,1}, {0,3,1,1});
 }
 
 ButtonTransitionSingleImage::~ButtonTransitionSingleImage() noexcept
@@ -18,7 +18,7 @@ ButtonTransitionSingleImage::~ButtonTransitionSingleImage() noexcept
 }
 
 ButtonTransitionSingleImage::ButtonTransitionSingleImage(const ButtonTransitionSingleImage& other): m_resource_manager_ptr{other.m_resource_manager_ptr},
-    m_texture{other.m_texture}, m_current_src_rect_ptr{other.m_current_src_rect_ptr}
+    m_texture{other.m_texture}, m_state_rects{},  m_current_src_rect_ptr{other.m_current_src_rect_ptr}
 {
     for(auto& rect : other.m_state_rects)
     {

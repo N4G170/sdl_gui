@@ -52,6 +52,9 @@ class Label : public GuiElement
         std::string Text() const { return m_text; }
         void Text(const std::string& text, const SDL_Colour& text_colour = {0,0,0,255});
 
+        int FontSize() const{ return m_font_ptr->FontSize(); }
+        void FontSize(int size);
+
         /**
          * \brief Line Length in px
          */
