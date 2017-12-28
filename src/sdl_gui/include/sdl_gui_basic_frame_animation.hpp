@@ -3,6 +3,7 @@
 #include <vector>
 #include <cmath>
 #include <memory>
+#include <algorithm>
 
 namespace sdl_gui
 {
