@@ -72,10 +72,13 @@ void Button::Render(float delta_time, Camera* camera)
 
     BaseButton::Render(delta_time, camera);
 
-    if(m_label_ptr){
+    if(m_label_ptr)
+    {
         m_label_ptr->Render(delta_time, camera);
-    SDL_Rect r{RectFromStructs(m_label_ptr->GlobalPosition(), m_label_ptr->Size())};
-    SDL_RenderDrawRect(m_main_pointers.main_renderer_ptr, &r);}
+        
+    // SDL_Rect r{RectFromStructs(m_label_ptr->GlobalPosition(), m_label_ptr->Size())};
+    // SDL_RenderDrawRect(m_main_pointers.main_renderer_ptr, &r);
+    }
 }
 //</f>
 
