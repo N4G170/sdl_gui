@@ -2,6 +2,7 @@
 #include "sdl_gui_constants.hpp"
 #include "sdl_gui_log.hpp"
 #include <utility>
+#include <algorithm>
 
 namespace sdl_gui
 {

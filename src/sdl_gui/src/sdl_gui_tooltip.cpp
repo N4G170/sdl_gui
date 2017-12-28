@@ -98,10 +98,10 @@ void Tooltip::Render(float delta_time)
 
 void Tooltip::Render(float delta_time, Camera* camera)
 {
-    if(m_collider)
-    {
-        m_collider->DebugRender(m_main_pointers.main_renderer_ptr);
-    }
+    // if(m_collider)
+    // {
+    //     m_collider->DebugRender(m_main_pointers.main_renderer_ptr);
+    // }
 
     //move label to mouse position
     int mouse_x{}, mouse_y{};

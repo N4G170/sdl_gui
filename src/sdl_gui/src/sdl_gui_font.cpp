@@ -7,8 +7,6 @@
 #include "sdl_gui_utf8.hpp"
 #include "sdl_gui_constants.hpp"
 
-#include "utils.hpp"
-
 namespace sdl_gui
 {
 

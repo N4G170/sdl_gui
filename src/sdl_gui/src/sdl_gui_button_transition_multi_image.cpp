@@ -10,6 +10,7 @@ ButtonTransitionMultiImage::ButtonTransitionMultiImage(ResourceManager* resource
     m_current_texture_ptr{nullptr}
 {
     SetStateTexture(c_img_btn_inactive, c_img_btn_active, c_img_btn_over, c_img_btn_pressed);
+    ChangeState(sdl_gui::ButtonState::ACTIVE);
 }
 
 ButtonTransitionMultiImage::~ButtonTransitionMultiImage() noexcept {}

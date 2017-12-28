@@ -4,8 +4,8 @@
 #include <algorithm>
 
 //<f> Constructors & operator=
-BarsPanel::BarsPanel(sdl_gui::GuiManager* gui_manager): m_gui_manager{gui_manager}, m_playing{false}, m_loop{false}, m_step{0.05}, m_timer{0} , m_value_direction{1},
-    m_run_sim_h{false}, m_run_sim_v{false}
+BarsPanel::BarsPanel(sdl_gui::GuiManager* gui_manager): m_gui_manager{gui_manager}, m_playing{false}, m_loop{false}, m_step{0.05f}, m_timer{0} , m_value_direction_h{1},
+    m_value_direction_v{1}, m_run_sim_h{false}, m_run_sim_v{false}
 {
     auto y{5.f};
 
@@ -18,7 +18,7 @@ BarsPanel::BarsPanel(sdl_gui::GuiManager* gui_manager): m_gui_manager{gui_manage
 
 
     //<f> Progress Bars
-    auto pb_x_spacing{10.f};
+    // auto pb_x_spacing{10.f};
     auto pb_y_spacing{10.f};
     auto regular_y_jump{25 + pb_y_spacing};
 
@@ -346,55 +346,56 @@ BarsPanel::~BarsPanel() noexcept
 
 void BarsPanel::Logic(float delta_time)
 {
-    if(m_playing && (m_run_sim_h || m_run_sim_v))//run bar similation
+    if(m_playing)
     {
         m_timer += delta_time;
 
         if(m_timer >= 0.05)
         {
-            m_timer = 0;
-
-            if(m_run_sim_h)
-            {
-                float ratio{m_progress_bar_h->Ratio()};
-                m_progress_bar_h->Ratio(ratio + m_step * m_value_direction);
-                if(m_progress_bar_h->Ratio() >= 1 && m_value_direction > 0)//full
-                {
-                    if(m_loop)
-                        m_value_direction = -1;
-                    else
-                        PlayPause(false);
-                }
-                else if(m_progress_bar_h->Ratio() <= 0 && m_value_direction < 0)
-                {
-                    if(m_loop)
-                        m_value_direction = 1;
-                    else
-                        PlayPause(false);
-                }
-            }
+            //<f> Vertical
             if(m_run_sim_v)
             {
                 float ratio{m_progress_bar_v->Ratio()};
-                m_progress_bar_v->Ratio(ratio + m_step * m_value_direction);
-                if(m_progress_bar_v->Ratio() >= 1 && m_value_direction > 0)//full
+                m_progress_bar_v->Ratio(ratio + m_step * m_value_direction_v);
+                if(m_progress_bar_v->Ratio() >= 1 && m_value_direction_v > 0)//full
                 {
                     if(m_loop)
-                        m_value_direction = -1;
+                        m_value_direction_v = -1;
                     else
                         PlayPause(false);
                 }
-                else if(m_progress_bar_v->Ratio() <= 0 && m_value_direction < 0)
+                else if(m_progress_bar_v->Ratio() <= 0 && m_value_direction_v < 0)
                 {
                     if(m_loop)
-                        m_value_direction = 1;
+                        m_value_direction_v = 1;
                     else
                         PlayPause(false);
                 }
             }
+            //</f> /Vertical
 
+            //<f> Horizontal
+            if(m_run_sim_h)
+            {
+                float ratio{m_progress_bar_h->Ratio()};
+                m_progress_bar_h->Ratio(ratio + m_step * m_value_direction_h);
+                if(m_progress_bar_h->Ratio() >= 1 && m_value_direction_h > 0)//full
+                {
+                    if(m_loop)
+                        m_value_direction_h = -1;
+                    else
+                        PlayPause(false);
+                }
+                else if(m_progress_bar_h->Ratio() <= 0 && m_value_direction_h < 0)
+                {
+                    if(m_loop)
+                        m_value_direction_h = 1;
+                    else
+                        PlayPause(false);
+                }
+            }
+            //</f> /Horizontal
         }
-
     }
 
 }

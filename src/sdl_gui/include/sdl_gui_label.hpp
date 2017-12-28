@@ -1,8 +1,9 @@
 #include <string>
-#include "SDL2/SDL.h"
+#include "SDL.h"
 #include "sdl_gui_element.hpp"
 #include "sdl_gui_local_texture.hpp"
 #include "sdl_gui_font.hpp"
+#include <mutex>
 
 namespace sdl_gui
 {
@@ -89,6 +90,8 @@ class Label : public GuiElement
          * Max line length allowed
          */
         int m_line_length;
+
+        std::mutex m_text_mutex;
 };
 
 #endif //LABEL_HPP

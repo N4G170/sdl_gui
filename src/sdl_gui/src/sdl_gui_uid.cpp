@@ -50,8 +50,16 @@ UID GenerateUID()
 
     std::stringstream ss;
     //format datetime and convert it to a string
-    ss << std::put_time(std::localtime(&now_time_t), "%X %d-%m-%Y");
+    struct tm buffer;
+    #ifdef __linux__
+    // ss << std::put_time(std::localtime(&now_time_t), "%X %d-%m-%Y");
+    localtime_r(&now_time_t, &buffer);
     // ss << std::put_time(std::localtime(&now_time_t), "%Y-%m-%d %X");
+    #elif _WIN32
+	localtime_s(&buffer, &now_time_t);
+    // ss << std::put_time(&buffer, "%X %d-%m-%Y");
+    #endif
+    ss << std::put_time(&buffer, "%X %d-%m-%Y");
 
     std::string new_string{ss.str()};
 

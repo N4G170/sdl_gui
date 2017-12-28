@@ -74,7 +74,8 @@ class BarsPanel
         bool m_loop;
         float m_step;
         float m_timer;
-        float m_value_direction;
+        float m_value_direction_h;
+        float m_value_direction_v;
 
         bool m_run_sim_h;
         bool m_run_sim_v;

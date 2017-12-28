@@ -5,14 +5,15 @@
 #include "SDL.h"
 #include <cmath>
 
-constexpr float SquareRoot(float number)
+// constexpr float SquareRoot(float number)
+float SquareRoot(float number)//std::sqrt is not constexpr need to find another way
 {
     return std::sqrt(number);
 }
 
 namespace Math
 {
-    const float PI{3.14159265358979};
+    const float PI{3.14159265358979f};
 }
 
 namespace Colour

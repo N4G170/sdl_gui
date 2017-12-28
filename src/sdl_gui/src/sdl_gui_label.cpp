@@ -6,8 +6,6 @@
 #include "sdl_gui_log.hpp"
 #include "sdl_gui_utils.hpp"
 
-#include "utils.hpp"
-
 namespace sdl_gui
 {
 //<f> Constructors & operator=
@@ -96,6 +94,8 @@ void Label::Render(float delta_time, Camera* camera)
     if(!m_render)
         return;
 
+    std::lock_guard<std::mutex> lock(m_text_mutex);
+
     SDL_Rect dst{RenderRect()};
     SDL_Rect src{dst};
     src.x = src.y = 0;
@@ -116,14 +116,15 @@ void Label::Render(float delta_time, Camera* camera)
     if(camera->RectInsideCamera(dst))
         m_text_texture.Render(&src, &dst);
 
-    SDL_RenderDrawRect(m_main_pointers.main_renderer_ptr, &dst);
-
+    // SDL_RenderDrawRect(m_main_pointers.main_renderer_ptr, &dst);
 }
 //</f>
 
 //<f> Getters/Setters
 void Label::Text(const std::string& text, const SDL_Colour& text_colour)
 {
+    std::lock_guard<std::mutex> lock(m_text_mutex);
+
     m_text_colour = text_colour;
     m_text = text;
     int w{0}, h{0};

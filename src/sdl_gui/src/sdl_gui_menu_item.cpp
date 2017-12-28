@@ -114,7 +114,7 @@ void MenuItem::Render(float delta_time, Camera* camera)
         return;
 
     SDL_Rect dst{RenderRect()};
-    m_collider->DebugRender(m_main_pointers.main_renderer_ptr, {12,255,0,255});
+    // m_collider->DebugRender(m_main_pointers.main_renderer_ptr, {12,255,0,255});
     //apply camera position
     if(!m_transform.ParentViewport())//if inside viewport we cant add camera position
     {

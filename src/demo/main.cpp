@@ -34,10 +34,10 @@ int main(int argc, char* argv[])
         //Create Event handler
         SDL_Event event;
         float frame_cap {1.f / 60 * 1000};
-        float last_frame_time {0};
+        float last_frame_time {0.f};
 
-        float fixed_frame_time {0.03};
-        float accumulated_time {0};
+        float fixed_frame_time {0.03f};
+        float accumulated_time {0.f};
 
         while(!quit)
         {

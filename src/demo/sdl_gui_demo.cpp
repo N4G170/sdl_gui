@@ -29,7 +29,7 @@ GuiDemo::GuiDemo(SDL_Renderer* renderer_ptr, sdl_gui::ResourceManager* resource_
 
     //<f> Buttons button
     auto buttons_panel_button{m_gui_manager.CreateElement<sdl_gui::SelectableButton>({0,0}, {100,30})};
-    buttons_panel_button->TransitionColourPtr()->SetStateColour(sdl_gui::ButtonState::SELECTED, {128,128,128,255});
+    buttons_panel_button->TransitionColourPtr()->SetStateColour(sdl_gui::ButtonState::SELECTED, {200,200,200,255});
     auto panel_label{m_gui_manager.CreateElement<sdl_gui::Label>({0,0}, {0,0})};
     panel_label->FontSize(18);
     panel_label->Text("<b>Buttons</b>");
@@ -40,7 +40,7 @@ GuiDemo::GuiDemo(SDL_Renderer* renderer_ptr, sdl_gui::ResourceManager* resource_
     //</f>
     //<f> Animation button
     auto animation_panel_button{m_gui_manager.CreateElement<sdl_gui::SelectableButton>({0,0}, {50,30})};
-    animation_panel_button->TransitionColourPtr()->SetStateColour(sdl_gui::ButtonState::SELECTED, {128,0,128,255});
+    animation_panel_button->TransitionColourPtr()->SetStateColour(sdl_gui::ButtonState::SELECTED, {200,200,200,255});
     panel_label = m_gui_manager.CreateElement<sdl_gui::Label>({0,0}, {0,0});
     panel_label->FontSize(18);
     panel_label->Text("<b>Animation</b>");
@@ -51,7 +51,7 @@ GuiDemo::GuiDemo(SDL_Renderer* renderer_ptr, sdl_gui::ResourceManager* resource_
     //</f>
     //<f> Bars & scrolls button
     auto bars_panel_button{m_gui_manager.CreateElement<sdl_gui::SelectableButton>({0,0}, {50,30})};
-    bars_panel_button->TransitionColourPtr()->SetStateColour(sdl_gui::ButtonState::SELECTED, {128,0,128,255});
+    bars_panel_button->TransitionColourPtr()->SetStateColour(sdl_gui::ButtonState::SELECTED, {200,200,200,255});
     panel_label = m_gui_manager.CreateElement<sdl_gui::Label>({0,0}, {0,0});
     panel_label->FontSize(18);
     panel_label->Text("<b>Bars & Scrolls</b>");
@@ -62,7 +62,7 @@ GuiDemo::GuiDemo(SDL_Renderer* renderer_ptr, sdl_gui::ResourceManager* resource_
     //</f>
     //<f> Others button
     auto others_panel_button{m_gui_manager.CreateElement<sdl_gui::SelectableButton>({0,0}, {50,30})};
-    others_panel_button->TransitionColourPtr()->SetStateColour(sdl_gui::ButtonState::SELECTED, {128,0,128,255});
+    others_panel_button->TransitionColourPtr()->SetStateColour(sdl_gui::ButtonState::SELECTED, {200,200,200,255});
     panel_label = m_gui_manager.CreateElement<sdl_gui::Label>({0,0}, {0,0});
     panel_label->FontSize(18);
     panel_label->Text("<b>Other elements</b>");
@@ -104,30 +104,10 @@ GuiDemo::GuiDemo(SDL_Renderer* renderer_ptr, sdl_gui::ResourceManager* resource_
     m_panels["others"]->Disable();
     m_panels["others"]->LocalPosition({sdl_config.window_w/2 - 350.f,105});
 
-    // buttons_panel_button->IsSelected(true);//select btn
-    // ChangePanel("btn", buttons_panel_button);
-    bars_panel_button->IsSelected(true);//select btn
-    ChangePanel("bars", bars_panel_button);
+    buttons_panel_button->IsSelected(true);//select btn
+    ChangePanel("btn", buttons_panel_button);
 
     //</f>//Panels
-
-
-    /*progress_bar_image_test = m_gui_manager.CreateElement<sdl_gui::Image>({500,120}, {40, 40});
-
-
-
-    auto label = m_gui_manager.CreateElement<sdl_gui::Label>({800,500},{0,0});
-    label->ConfigLabel(sdl_gui::c_default_font_path, sdl_gui::c_default_font_size, "Due to high maintenance cost of scripts related to the Arch Build System, we have decided to deprecate the abs tool and thus rsync as a way of obtaining PKGBUILDs.\
-    \nThe asp tool, available in [extra], provides similar functionality to abs. asp export pkgname can be used as direct alternative; more information about its usage can be found in the documentation.\
-    Additionally Subversion sparse checkouts, as described here, can be used to achieve a similar effect. For fetching all PKGBUILDs, the best way is cloning the svntogit mirrors.\
-    While the extra/abs package has been already dropped, the rsync endpoint (rsync://rsync.archlinux.org/abs) will be disabled by the end of the month.", {0,0,0,255});
-    label->LineLength(300);
-    auto label2 = m_gui_manager.CreateElement<sdl_gui::Label>({1250,500},{0,0});
-    label2->ConfigLabel(sdl_gui::c_default_font_path, sdl_gui::c_default_font_size, "Due to high maintenance cost of scripts related to the Arch Build System, we have decided to deprecate the abs tool and thus rsync as a way of obtaining PKGBUILDs.\
-    The asp tool, available in [extra], provides similar functionality to abs. asp export pkgname can be used as direct alternative; more information about its usage can be found in the documentation.\
-    Additionally Subversion sparse checkouts, as described here, can be used to achieve a similar effect. For fetching all PKGBUILDs, the best way is cloning the svntogit mirrors.\
-    While the extra/abs package has been already dropped, the rsync endpoint (rsync://rsync.archlinux.org/abs) will be disabled by the end of the month.", {0,0,0,125});
-    label2->LineLength(300);*/
 }
 
 GuiDemo::~GuiDemo()
