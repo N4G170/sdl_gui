@@ -31,10 +31,10 @@ Currently sdl_gui has the following elements (present in demo):
 - sliders: both horizontal and vertical sliders
 - Image: basic image to be rendered, used by the other elements, but not in the cleanest way
 - Label: The one I enjoyed making the most (mainly because of the issues with the font), it supports some formatting like:
- - Bold: <b> </b>
- - Italic: <b> </b>
- - New line: \\n
- - Tab: \\t
+  - Bold: \<b> \</b>
+  - Italic: \<b> \</b>
+  - New line: \\n
+  - Tab: \\t
 - Layout: basic structure used to arrange(grid, line, column,...) all elements that it is the parent of.
 - ProgressBar: like a loading bar, can be horizontal or vertical
 - ScrollBox: this one is a bit incomplete, it basically is a list of labels with a scrollbar
@@ -74,7 +74,7 @@ After that, open terminal window at the base of the project (the folder with thi
 - cmake ..
 - make -j
 ```
-If no errors appear, the build is complete and you can run the program with the command ./generic
+If no errors appear, the build is complete and you can run the program with the command ./demo_sdl_gui
 I did not configure any install instructions, so if you want to move the build, copy the folder 'data' and the files 'demo_sdl_gui' and libsdl_gui.so from the build folder.
 As you can see, the linux build creates a separated .so lib with only the gui files, to improve portability.
 Sadly on windows I was unable to do so, as my code is not ready for it, when implementing the ECS I'll take extra care to make the code ready for it.
