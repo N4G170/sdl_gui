@@ -20,7 +20,7 @@ The new ECS system is similar(on a smaller scale) to how unity3d objects and com
 
 I really enjoy working on this project, it made me look differently to GUIs, they are more complicated than I thought. My favourite part was working with utf8 and creating the font sheet texture, for easier use of text (as sdl ttf rendering in not the quickest).
 
-######Existing elements.
+###### Existing elements.
 Currently sdl_gui has the following elements (present in demo):
 - BaseButton: Basic button that can use colour or images as transition (active/inactive/over/pressed)
 - BasicFrameAnimation: basic animation that uses images (one per frame, or one divided in areas)
@@ -55,7 +55,6 @@ Some of this elements have problems that will be solved when I move to my ECS sy
 If you are using one of the release builds, double click the .exe on windows or run in a terminal on linux.
 The provided build represents a demo showcasing the elements present on the project. Use the button on the top to change panels and try the elements.
 
-
 ## Building the program
 
 If you are building this project I recommend using a linux distro, as it is so easier.
@@ -66,8 +65,10 @@ First install all the dependencies:
 - SDL2
 - SDL2_image
 - SDL2_ttf
-- cmake (needed for "fast" build)
+- cmake
+
 After that, open terminal window at the base of the project (the folder with this file) and run the commands:
+
 ```
 - mkdir build
 - cd build
@@ -83,18 +84,17 @@ NOTE: As cmake creates the executable as a shared object (I have yet to find why
 
 ### On windows
 
-On windows, building the program is not that easier. As the cmake module used to find SDL2 does not work on windows, the build has to be made manually.
+As my SDL2 cmake modules are not working properly on windows, the 'vs' folder contains a Visual Studio solution with the project and all the needed dependencies linked, so it should be a matter of opening the solution on a VS 15+ and build it.
 
-Inside the vs folder there is a Visual studio solution configured to build the program using the current folder structure.
-If all goes well, all you have to do is open the solution, and build (only works for x64 builds).
+NOTE: the project only builds when targeting x64.
 
 If the solution does not work, or you use another build system, you have to add the files by hand to you project and take care of the dependencies.
 For ease of building, you can find the needed dependencies inside the vs folder.
 NOTE: I do not own any of the code from the dependencies. Their license allows them to be freely used and shared.
 
-To run the program, you need the data folder next to the .exe as well as all of SDL2, SDL2_image, SDL2_ttf dlls (you can find them in my release or download them from the SDL website).
+To run the program, you need the data folder next to the .exe as well as all of [SDL2](https://www.libsdl.org/), [SDL2_image](https://www.libsdl.org/projects/SDL_image/), [SDL2_ttf](https://www.libsdl.org/projects/SDL_ttf/) dlls (you can find them in my release or download them from the linked SDL website).
 
-NOTE: the windows builds does not make sdl_gui as a separated lib, as I was unable to do so, because my code is not ready for it, when implementing the ECS I'll take extra care to make the code ready for it. One of the problems of multiplatform development, if you do not expect it.
+NOTE: the windows builds does not make sdl_gui as a separated lib. As I never had to build dlls, I was not aware of the need to export and import functions with "declspec", and as I will change the entire structure of this project with the ECS system and to add the export/import dll would be too messy, I decided to prepare add it during the convertion to the ECS.
 
 ## TODO
 
