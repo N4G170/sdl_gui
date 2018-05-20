@@ -5,6 +5,17 @@ project("CMake Test" CXX)
 set(CMAKE_CXX_STANDARD 14)
 # add_compile_options(-g)
 # add_compile_options(-g -Weffc++)
+# set(CMAKE_BUILD_TYPE Debug)
+
+if(NOT CMAKE_BUILD_TYPE)
+# set(CMAKE_BUILD_TYPE Debug)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+# set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
 set(app_name "demo_sdl_gui")
 set(lib_name "sdl_gui")
 
@@ -45,6 +56,7 @@ get_directory_property(GUI_HEADER_FILES DIRECTORY src DEFINITION GUI_HEADER_FILE
 
 # includes cmake_modules/FindSDL2*.cmake
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+if (UNIX)
 #SDL2
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIR})
@@ -54,16 +66,31 @@ include_directories(${SDL2_IMAGE_INCLUDE_DIR})
 #SDL2 ttf
 find_package(SDL2_ttf REQUIRED)
 include_directories(${SDL2_TTF_INCLUDE_DIR})
-#SDL2 mixer
-# find_package(SDL2_mixer REQUIRED)
-# include_directories(${SDL2_MIXER_INCLUDE_DIR})
-#SDL2 net
-#find_package(SDL2_net REQUIRED)
-#include_directories(${SDL2_NET_INCLUDE_DIR})
+endif(UNIX)
 
+if (WIN32)
+#SDL2
+set(SDL2_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/include/sdl2/)
+include_directories(${SDL2_INCLUDE_DIR})
+set(SDL2_LIBRARY ${CMAKE_SOURCE_DIR}/external/lib/sdl2.lib ${CMAKE_SOURCE_DIR}/external/lib/sdl2main.lib)
+#SDL2 image
+set(SDL2_IMAGE_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/include/sdl2/)
+include_directories(${SDL2_IMAGE_INCLUDE_DIR})
+set(SDL2_IMAGE_LIBRARY ${CMAKE_SOURCE_DIR}/external/lib/sdl2_image.lib)
+#SDL2 ttf
+set(SDL2_TTF_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/include/sdl2/)
+include_directories(${SDL2_TTF_INCLUDE_DIR})
+set(SDL2_TTF_LIBRARY ${CMAKE_SOURCE_DIR}/external/lib/sdl2_ttf.lib)
+endif(WIN32)
+
+#define exe folder
+# set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin )#for so
+set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/lib )#for a
 #GUI LIB
-add_library(${lib_name} SHARED ${GUI_SOURCE_FILES} ${GUI_HEADER_FILES})
+# add_library(${lib_name} SHARED ${GUI_SOURCE_FILES} ${GUI_HEADER_FILES})
+add_library(${lib_name} STATIC ${GUI_SOURCE_FILES} ${GUI_HEADER_FILES})
 
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin )
 #DEMO EXECUTABLE
 add_executable(${app_name} ${DEMO_SOURCE_FILES} ${DEMO_HEADER_FILES})
 #change rpath
@@ -75,3 +102,28 @@ target_link_libraries(${app_name} ${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARY} ${SDL2_T
 add_custom_command(TARGET ${app_name} POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
                    ${CMAKE_SOURCE_DIR}/data $<TARGET_FILE_DIR:${app_name}>/data)
+
+add_custom_command(TARGET ${app_name} POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+               ${CMAKE_SOURCE_DIR}/src/sdl_gui/include $<TARGET_FILE_DIR:${app_name}>/lib/include)
+
+if (WIN32)
+set(DLLS
+    libfreetype-6.dll
+    libjpeg-9.dll
+    libpng16-16.dll
+    libtiff-5.dll
+    libwebp-7.dll
+    SDL2.dll
+    SDL2_image.dll
+    SDL2_ttf.dll
+    zlib1.dll
+)
+
+foreach(dll ${DLLS})
+    add_custom_command(TARGET ${app_name} POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                   "${CMAKE_SOURCE_DIR}/external/dll/${dll}"
+                   $<TARGET_FILE_DIR:${app_name}>)
+endforeach(dll)
+endif (WIN32)
